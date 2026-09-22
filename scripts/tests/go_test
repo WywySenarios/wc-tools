@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Verifies every Go module under src/ (tools and the shared lib)
+# compile and pass their tests. Fails closed when the go toolchain is missing.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+cd "$SCRIPT_DIR/../.."
+
+if ! command -v go >/dev/null 2>&1; then
+	echo "go_test: go toolchain required (install go 1.24 or newer) — failing closed" >&2
+	exit 1
+fi
+
+echo "==> go test (every src/<name>/ with go.mod)"
+found_module=0
+for tool_dir in src/*/; do
+	[ -f "$tool_dir/go.mod" ] || continue
+	# src/shared is the shared lib, tested in its own section below.
+	[ "$(basename "$tool_dir")" = "shared" ] && continue
+	found_module=1
+	(
+		cd "$tool_dir"
+		go test ./...
+	)
+	echo "    ok: go test ./... in $tool_dir"
+done
+[ "$found_module" -eq 1 ] || {
+	echo "go_test: no go modules found under src/ — nothing to test" >&2
+	exit 1
+}
+
+echo "==> go test (src/shared shared lib)"
+(
+	cd src/shared
+	go test ./...
+)
+echo "    ok: go test ./... in src/shared"

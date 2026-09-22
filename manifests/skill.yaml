@@ -1,0 +1,10 @@
+name: skill
+path: /home/wc/tools/skill
+argv_schema:
+  type: object
+  properties:
+    name:
+      type: string
+      description: Skill name to load; omit or use "list" to list available skills.
+  required: []
+  additionalProperties: false

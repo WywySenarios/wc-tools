@@ -1,0 +1,34 @@
+type: object
+description: Tool registry & FUSE execution settings.
+properties:
+  fuse:
+    type: object
+    description: FUSE execution settings. Enabled by default.
+    properties:
+      enabled:
+        type: boolean
+        default: true
+additionalProperties:
+  type: object
+  description: Tool definition, keyed by tool name.
+  required:
+    - path
+  properties:
+    description:
+      type: string
+    enabled:
+      type: boolean
+      default: true
+    path:
+      type: string
+      description: Absolute path to the tool executable.
+    schema:
+      type: object
+      description: Raw JSON schema advertised to the agent.
+    runtime_injection:
+      type: array
+      description: >-
+        Property names injected by the tool-call layer at call time (JSON tools only);
+        not part of the tool-visible schema and absent from the derived argv_schema.
+      items:
+        type: string

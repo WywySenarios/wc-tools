@@ -1,0 +1,23 @@
+name: read
+path: /home/wc/tools/read
+argv_schema:
+  type: object
+  properties:
+    file:
+      type: string
+      description: Path to read, relative to the project root.
+    offset:
+      type: integer
+      minimum: 1
+      description: 1-based line to start from.
+    max_lines:
+      type: integer
+      minimum: 1
+      description: Maximum number of lines to print.
+    max_bytes:
+      type: integer
+      minimum: 1
+      description: Maximum number of bytes to print.
+  required:
+    - file
+  additionalProperties: false

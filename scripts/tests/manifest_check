@@ -1,0 +1,88 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["pyyaml==6.0.2"]
+# ///
+"""Validates every shipped tool manifest structurally. The manifest is the single
+source of truth for the tool contract; each must be a well-formed argv_schema
+with the canonical name/path."""
+
+import os
+import sys
+
+import yaml
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MANIFESTS = os.path.join(ROOT, "manifests")
+
+
+def validate_manifest(name, data):
+    """Return a list of errors for one manifest, or [] if it is valid."""
+    errors = []
+
+    if not isinstance(data, dict):
+        return [f"{name}: manifest must be a mapping"]
+
+    if data.get("name") != name:
+        errors.append(
+            f"{name}: manifest name is {data.get('name')!r}, expected {name!r}"
+        )
+    expected_path = f"/home/wc/tools/{name}"
+    if data.get("path") != expected_path:
+        errors.append(
+            f"{name}: manifest path is {data.get('path')!r}, "
+            f"expected {expected_path!r} (installed config must match)"
+        )
+
+    schema = data.get("argv_schema")
+    if not isinstance(schema, dict):
+        errors.append(f"{name}: argv_schema must be a mapping")
+    else:
+        if schema.get("type") != "object":
+            errors.append(f"{name}: argv_schema.type must be 'object'")
+        props = schema.get("properties")
+        if not isinstance(props, dict):
+            errors.append(f"{name}: argv_schema.properties must be a mapping")
+        else:
+            for key, prop in props.items():
+                if not isinstance(prop, dict) or "type" not in prop:
+                    errors.append(
+                        f"{name}: argv_schema property {key!r} must be a mapping with a 'type'"
+                    )
+        required = schema.get("required")
+        if not isinstance(required, list):
+            errors.append(f"{name}: argv_schema.required must be a list")
+        elif not isinstance(props, dict):
+            pass  # properties error already reported
+        else:
+            for key in required:
+                if not isinstance(key, str):
+                    errors.append(
+                        f"{name}: argv_schema.required entries must be strings"
+                    )
+                elif key not in props:
+                    errors.append(
+                        f"{name}: argv_schema.required references unknown property {key!r}"
+                    )
+        if schema.get("additionalProperties") is not False:
+            errors.append(f"{name}: argv_schema.additionalProperties must be false")
+
+    return errors
+
+
+print("==> manifest validation")
+errors = []
+count = 0
+for fn in sorted(os.listdir(MANIFESTS)):
+    if not fn.endswith(".yaml"):
+        continue
+    tool = fn[: -len(".yaml")]
+    with open(os.path.join(MANIFESTS, fn), encoding="utf-8") as handle:
+        data = yaml.safe_load(handle)
+    errors.extend(validate_manifest(tool, data))
+    count += 1
+
+if errors:
+    print("\n".join(errors), file=sys.stderr)
+    sys.exit(1)
+print(f"    ok: {count} manifests valid")

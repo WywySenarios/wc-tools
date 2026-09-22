@@ -1,0 +1,32 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["pyyaml==6.0.2"]
+# ///
+"""Parses every committed *.yaml/*.yml in the repo."""
+
+import os
+import sys
+
+import yaml
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+print("==> yaml parse")
+errors = []
+for dirpath, dirnames, filenames in os.walk(ROOT):
+    dirnames[:] = [d for d in dirnames if d != ".git"]
+    for fn in filenames:
+        if not fn.endswith((".yaml", ".yml")):
+            continue
+        path = os.path.join(dirpath, fn)
+        with open(path, encoding="utf-8") as f:
+            try:
+                list(yaml.safe_load_all(f))
+            except yaml.YAMLError as exc:
+                errors.append(f"{path}: {exc}")
+if errors:
+    for err in errors:
+        print(err, file=sys.stderr)
+    sys.exit(1)
+print("    ok: all YAML parses")

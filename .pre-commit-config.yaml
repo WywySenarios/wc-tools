@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: shell-parse
+        name: shell_parse
+        entry: ./scripts/tests/shell_parse
+        language: system
+        pass_filenames: false
+      - id: manifest-check
+        name: manifest_check
+        entry: ./scripts/tests/manifest_check
+        language: system
+        pass_filenames: false
+      - id: yaml-parse
+        name: yaml_parse
+        entry: ./scripts/tests/yaml_parse
+        language: system
+        pass_filenames: false
+      - id: go-test
+        name: go_test
+        entry: ./scripts/tests/go_test
+        language: system
+        pass_filenames: false

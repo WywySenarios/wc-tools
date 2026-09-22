@@ -1,0 +1,23 @@
+name: edit
+path: /home/wc/tools/edit
+argv_schema:
+  type: object
+  properties:
+    file:
+      type: string
+      description: Path to edit, relative to the project root.
+    oldString:
+      type: string
+      description: Exact text to replace.
+    newString:
+      type: string
+      description: Replacement text.
+    replaceAll:
+      type: boolean
+      default: false
+      description: Replace all occurrences (required when the old string matches more than once).
+  required:
+    - file
+    - oldString
+    - newString
+  additionalProperties: false

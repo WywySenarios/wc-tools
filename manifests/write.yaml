@@ -1,0 +1,15 @@
+name: write
+path: /home/wc/tools/write
+argv_schema:
+  type: object
+  properties:
+    file:
+      type: string
+      description: Path to write, relative to the project root.
+    content:
+      type: string
+      description: Full file content to write.
+  required:
+    - file
+    - content
+  additionalProperties: false

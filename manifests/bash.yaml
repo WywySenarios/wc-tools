@@ -1,0 +1,19 @@
+name: bash
+path: /home/wc/tools/bash
+argv_schema:
+  type: object
+  properties:
+    command:
+      type: string
+      description: Shell command to execute with `bash -c`.
+    timeout:
+      type: number
+      minimum: 1
+      default: 60
+      description: Timeout in seconds.
+    workdir:
+      type: string
+      description: Working directory, relative to the project root.
+  required:
+    - command
+  additionalProperties: false
