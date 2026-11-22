@@ -1,5 +1,6 @@
 name: bash
 path: /home/wc/tools/bash
+description: Execute a shell command with `bash -c` in the project workspace and surface its exit code.
 argv_schema:
   type: object
   properties:
